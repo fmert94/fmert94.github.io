@@ -209,55 +209,5 @@
       <footer>© fmert — F. Mert Erdoğan</footer>
     </main>
   </div>
-
-
-
-
-
-
-
-<!-- fmert counter: single instance -->
-<div id="fmert-counter" style="margin:36px auto 24px;max-width:960px;padding:14px;border:1px solid rgba(0,0,0,.15);
-  border-radius:12px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;gap:12px;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:inherit">
-  <span style="opacity:.85;letter-spacing:.4px">Ziyaretçi Sayacı</span>
-  <span id="fmert-digits" style="font:800 28px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;
-    padding:4px 10px;border-radius:10px;border:1px solid rgba(196,107,43,.45);
-    box-shadow:inset 0 0 12px rgba(196,107,43,.25);">0000000</span>
-</div>
-<script>
-(function(){
-  var el=document.getElementById('fmert-digits');
-  function render(v){ el.textContent=String(v||0).padStart(7,'0'); }
-  var NS='fmert.com', KEY='home', DAY=86400000, now=Date.now();
-  var last=+localStorage.getItem('fmert_hit_at')||0;
-  var mode=(now-last < DAY) ? 'get' : 'hit';
-  function fallback(){ var k='fmert_local'; var n=(+localStorage.getItem(k)||0)+1; localStorage.setItem(k,n); render(n); }
-  fetch('https://api.countapi.xyz/'+mode+'/'+encodeURIComponent(NS)+'/'+encodeURIComponent(KEY))
-    .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && typeof d.value!=='undefined'){ render(d.value); if(mode==='hit') localStorage.setItem('fmert_hit_at', String(now)); } else { fallback(); } })
-    .catch(fallback);
-})();
-</script>
-<!-- /fmert counter -->
-
-<!-- fmert cover fix (BUA only) -->
-<script>
-(function(){
-  var NEW_SRC='IMG_6493.jpg';
-  function setCover(img){ if(!img) return false; try{ img.src=NEW_SRC; img.srcset=''; img.loading='lazy'; img.decoding='async'; return true; }catch(e){} return false; }
-  var nodes=Array.from(document.querySelectorAll('h1,h2,h3,h4,.title,.book-title,strong,em,span,b'));
-  nodes.filter(function(n){ return /Bir\s+Unutu[sş]un\s+Anatomi[sş]i/i.test((n.textContent||'').trim()); })
-       .forEach(function(n){
-         var c=n, hops=0;
-         while(c && hops<8 && !(c.matches&&c.matches('.card, article, li, .book, .kitap, .item, .grid > *'))) { c=c.parentElement; hops++; }
-         var img=c?c.querySelector('img'):null;
-         setCover(img);
-       });
-})();
-</script>
-<!-- /fmert cover fix -->
-
-
 </body>
 </html>
