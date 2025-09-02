@@ -210,57 +210,54 @@
     </main>
   </div>
 
-<!-- fmert: sayaç + kapak güncelle (non-destructive) -->
-<style>
-  .bua-counter{margin:36px auto 24px;max-width:960px;padding:16px;border:1px solid rgba(245,240,230,.12);
-    border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.04));display:flex;
-    align-items:center;justify-content:center;gap:14px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#f5f0e6}
-  .bua-label{opacity:.85;letter-spacing:.6px}
-  .bua-digits{font:800 clamp(22px,5vw,38px)/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;padding:6px 14px;border-radius:12px;
-    border:1px solid rgba(196,107,43,.45);box-shadow:inset 0 0 18px rgba(196,107,43,.25),0 2px 12px rgba(0,0,0,.35);
-    background:linear-gradient(180deg,rgba(248,222,160,.95),rgba(167,116,34,.95));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .bua-note{font-size:12px;opacity:.7;text-align:center;margin-top:8px}
-</style>
 
-<section id="bua-counter" class="bua-counter" role="status" aria-live="polite">
-  <span class="bua-label">Ziyaretçi Sayacı</span>
-  <span id="bua-digits" class="bua-digits">0000000</span>
-</section>
-<div class="bua-note">Sayaç, ziyaretçiyi 24 saatte bir kez benzersiz sayar. İnternet kesilirse yerel yedek devreye girer.</div>
 
+
+
+
+
+<!-- fmert counter: single instance -->
+<div id="fmert-counter" style="margin:36px auto 24px;max-width:960px;padding:14px;border:1px solid rgba(0,0,0,.15);
+  border-radius:12px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;gap:12px;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:inherit">
+  <span style="opacity:.85;letter-spacing:.4px">Ziyaretçi Sayacı</span>
+  <span id="fmert-digits" style="font:800 28px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;
+    padding:4px 10px;border-radius:10px;border:1px solid rgba(196,107,43,.45);
+    box-shadow:inset 0 0 12px rgba(196,107,43,.25);">0000000</span>
+</div>
 <script>
 (function(){
-  var yeniKapak = 'IMG_6493.jpg';
-  function setImg(img){ if(!img) return false; try { img.src=yeniKapak; img.srcset=''; img.loading='lazy'; img.decoding='async'; return true; } catch(e){} return false; }
-  var done = setImg(document.querySelector('#hero img'));
-  if(!done){
-    var imgs = Array.from(document.querySelectorAll('img'));
-    var re = /(unutu[sş]|anatom)/i;
-    for(var i=0;i<imgs.length;i++){ var t=(imgs[i].alt||'')+' '+(imgs[i].title||'')+' '+(imgs[i].src||''); if(re.test(t)){ done=setImg(imgs[i]); if(done) break; } }
-  }
-  if(!done){
-    var cards = Array.from(document.querySelectorAll('.card, article'));
-    cards.forEach(function(c){
-      var titleEl = c.querySelector('.title, h3, strong');
-      if(titleEl && /Bir Unutu[sş]un Anatomisi/i.test(titleEl.textContent||'')){
-        var im = c.querySelector('img'); setImg(im); done=true;
-      }
-    });
-  }
-
-  var el=document.getElementById('bua-digits');
+  var el=document.getElementById('fmert-digits');
   function render(v){ el.textContent=String(v||0).padStart(7,'0'); }
   var NS='fmert.com', KEY='home', DAY=86400000, now=Date.now();
-  var last=+localStorage.getItem('bua_hit_at')||0;
+  var last=+localStorage.getItem('fmert_hit_at')||0;
   var mode=(now-last < DAY) ? 'get' : 'hit';
-  function fallback(){ var k='bua_local'; var n=(+localStorage.getItem(k)||0)+1; localStorage.setItem(k,n); render(n); }
+  function fallback(){ var k='fmert_local'; var n=(+localStorage.getItem(k)||0)+1; localStorage.setItem(k,n); render(n); }
   fetch('https://api.countapi.xyz/'+mode+'/'+encodeURIComponent(NS)+'/'+encodeURIComponent(KEY))
     .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && typeof d.value!=='undefined'){ render(d.value); if(mode==='hit') localStorage.setItem('bua_hit_at', String(now)); } else { fallback(); } })
+    .then(function(d){ if(d && typeof d.value!=='undefined'){ render(d.value); if(mode==='hit') localStorage.setItem('fmert_hit_at', String(now)); } else { fallback(); } })
     .catch(fallback);
 })();
 </script>
-<!-- /fmert -->
+<!-- /fmert counter -->
+
+<!-- fmert cover fix (BUA only) -->
+<script>
+(function(){
+  var NEW_SRC='IMG_6493.jpg';
+  function setCover(img){ if(!img) return false; try{ img.src=NEW_SRC; img.srcset=''; img.loading='lazy'; img.decoding='async'; return true; }catch(e){} return false; }
+  var nodes=Array.from(document.querySelectorAll('h1,h2,h3,h4,.title,.book-title,strong,em,span,b'));
+  nodes.filter(function(n){ return /Bir\s+Unutu[sş]un\s+Anatomi[sş]i/i.test((n.textContent||'').trim()); })
+       .forEach(function(n){
+         var c=n, hops=0;
+         while(c && hops<8 && !(c.matches&&c.matches('.card, article, li, .book, .kitap, .item, .grid > *'))) { c=c.parentElement; hops++; }
+         var img=c?c.querySelector('img'):null;
+         setCover(img);
+       });
+})();
+</script>
+<!-- /fmert cover fix -->
+
 
 </body>
 </html>
